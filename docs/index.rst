@@ -20,9 +20,6 @@ django-usersettings and start using user settings. For
 more detailed information read through
 the documentation listed below.
 
-If you are upgrading from a previous release, please read the
-:ref:`upgrade guide <upgrade>` for information on what's changed.
-
 Contents:
 
 .. toctree::
@@ -30,13 +27,10 @@ Contents:
    
    quickstart
    release-notes
-   upgrade
    defining-settings
    using-settings
    generating-forms
    views
-   included-settings
-   signals
    faq
 
 .. seealso::

@@ -6,31 +6,48 @@ from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.contrib.auth.models import User
-from ..views.shortview import render_request_to_response
 from registry import register
 from formgen import get_settings_form
+from functions import getsetting, getsettings, setsetting
 
 
+class Group(object):
+    def __init__(self, name):
+        self.name = name
+
+    def get_absolute_url(self):
+        return reverse('usersettings:group', kwargs=dict(group=self.name), current_app='usersettings')
 
 
-
-@login_required
-def index(request):
-    if request.method == 'POST':
-        form = get_settings_form(request.user, request.POST)
-        if form.is_valid():
-            obj = form.save()
-            return HttpResponseRedirect(reverse('settings:index'))
-    else:
-        form = get_settings_form(request.user)
-
+def list_groups(request):
     return render(
         request,
-        'settings/index.html',
+        'usersettings/list_groups.html',
         dict(
-            form = form,
+            groups=(Group(n) for n in register.groups()),
         ),
+        current_app='usersettings',
     )
 
 
-
+def view_group(request, group):
+    setting_objects = register.in_group(group)
+    setting_names = (s.name for s in setting_objects)
+    settings = getsettings(request.user, setting_names)
+    form_type = get_settings_form(setting_objects)
+    if request.method == 'POST':
+        form = form_type(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(request.path)
+    else:
+        form = form_type(request.user)
+    return render(
+        request,
+        'usersettings/view_group.html',
+        dict(
+            group=group,
+            form=form,
+        ),
+        current_app='usersettings',
+    )

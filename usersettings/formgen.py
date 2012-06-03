@@ -1,50 +1,47 @@
 from django import forms
+from base import Setting
 from registry import register
-from functions import getsetting, setsetting, get_all_settings
+from functions import getsetting, setsetting, getsettings, setsettings
 
 
+class SettingsForm(forms.Form):
+    settings = NotImplemented
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        kwargs['initial'] = getsettings(user, [s.name for s in self.settings])
+        super(SettingsForm, self).__init__(*args, **kwargs)
+
+    def save(self):
+        updates = {}
+        # it could just be that the self.settings list
+        # does not match the posted data (server restart with new settings)
+        # in that case, only save the ones that were posted,
+        # the form is valid anyways
+        setsettings(self.user, self.cleaned_data)
 
 
-
-def form_save_method(self, user):
-    # TODO: limit the amount of queries this makes
-    field_values = {}
-    k = self.cleaned_data
-    for fieldname,field in self.fields.iteritems():
-        key = fieldname[len(field._setting.name)+1:]
-        if field._setting in field_values:
-            field_values[field._setting][key] = self.cleaned_data[fieldname]
+def get_settings_form(settings):
+    setting_objects = []
+    for s in settings:
+        if isinstance(s, Setting):
+            setting_objects.append(s)
+        elif isinstance(s, basestring):
+            setting_objects.append(register.get(s))
         else:
-            field_values[field._setting] = {key:self.cleaned_data[fieldname]}
-    for setting,value in field_values.iteritems():
-        setsetting(user, setting.name, setting.value_from_form_data(value))
+            raise TypeError
 
-
-
-def get_settings_form(user, POST={}):
     fields = {}
-    if POST:
-        for setting in register.settings():
-            for k,v in setting.formfields(None).iteritems():
-                v._setting = setting
-                fields['%s_%s'%(setting.name,k)] = v
-    else:
-        all_settings = get_all_settings(user)
-        for setting in register.settings():
-            formfields = setting.formfields(all_settings[setting.name])
-            for k,v in formfields.iteritems():
-                v._setting = setting
-                fields['%s_%s'%(setting.name,k)] = v
-    fields['save'] = lambda self: form_save_method(self, user)
-    form_type = type(
-        'SettingsForm',
-        (forms.Form,),
+    for setting in settings:
+        field = setting.formfield()
+        if not field.help_text and setting.description:
+            field.help_text = setting.description
+        fields[setting.name] = field
+
+    fields['settings'] = settings
+
+    return type(
+        'CustomSettingsForm',
+        (SettingsForm,),
         fields,
     )
-    if POST:
-        return form_type(POST)
-    else:
-        return form_type()
-
-
-

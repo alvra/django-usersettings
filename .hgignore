@@ -1,5 +1,7 @@
 syntax: glob
+db_settings.py
+settings_overrides.py
 *.pyc
 *~
-_build
-_static
+sqlite.db
+docs/_build

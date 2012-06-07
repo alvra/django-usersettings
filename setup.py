@@ -4,7 +4,7 @@ from distutils.core import setup
 setup(
     name='django-usersettings',
     version='0.1',
-    description='An pluggable application for Django to manage usersettings across apps.',
+    description='A pluggable application for Django to manage usersettings across apps.',
     author='Alexander van Ratingen',
     author_email='alexander@van-ratingen.nl',
     url='http://www.bitbucket.org/Blue/django-usersettings/',

@@ -4,14 +4,6 @@ import os, sys
 
 from django import VERSION as django_version
 
-try:
-    import usersettings
-except ImportError:
-    print 'usersettings example_project: Found no usersettings installation, using the local version'
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-else:
-    print 'usersettings example_project: Usersettings found, using that version'
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 

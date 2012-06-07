@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from django import forms
-from usersettings import Setting, PickledSetting, register
+from usersettings import Setting, PickledSetting
+from usersettings.registry import register  # importing straight from usersettings causes errors on django 1.2.7
 
 
 class Test1Setting(Setting):

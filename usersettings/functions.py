@@ -5,6 +5,15 @@ from registry import register
 # TODO: what to do with anonymous users?
 
 
+def bulk_create(model, objects):
+    manager = model.objects
+    if hasattr(manager, 'bulk_create'):
+        return manager.bulk_create(objects)
+    else:
+        for obj in objects:
+            obj.save()
+
+
 def getsetting(user, name):
     # this makes sure it exists
     setting = register.get(name)
@@ -89,4 +98,4 @@ def setsettings(user, values):
             name=setting,
             value=settings[setting].encode(values[setting]),
         ))
-    UserSetting.objects.bulk_create(create)
+    bulk_create(UserSetting, create)
